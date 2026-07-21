@@ -45,7 +45,7 @@ socket.addEventListener("close",(event) => {
 
 ```
 
-//lets Understand about the properties in the WebSocket class
+lets Understand about the properties in the WebSocket class
 
 1.WebSocket.binaryType : The WebSocket.binaryType property controls the type of binary data being received over the WebSocket connection.
 A string:
@@ -63,7 +63,7 @@ data type : An unsigned long
 3. WebSocket.protocol : read-only property returns the name of the sub-protocol the server selected, or the empty string if no connection is established
 default value is empty string , it changes only if mentioned explicitly in the object creation
 
-//Important
+Important
 4.WebSocket.readyState : read-only property returns the current state of the WebSocket connection.
 the datatype is number having four states 0 , 1 , 2 , 3
     0 : websocket is created but connection not opened
@@ -152,7 +152,7 @@ Listening for errors
 websocket.addEventListener("error",(e) => {})
 
 ```javascript
-// sending messages
+// Sending messages
 websocket.addEventListener("open", () => {
 log("CONNECTED");
 pingInterval = setInterval(() => {
@@ -163,7 +163,7 @@ pingInterval = setInterval(() => {
 const message = {};
 JSON.strigify(message);
 
-// receiving messages
+ //Receiving messages
 
 websocket.addEventListner("message",(e) => {
     console.log(e.data , counter)
@@ -240,6 +240,43 @@ initializeWebSocketListeners(websocket);
 
 ```
 
+WebSocket for Servers
+
+Lets understand how connection is connected In the websocket server is nothing more than an application listening on any port of a TCP server
+
+first The WebsocketHandshake : use port 80 or 443 for listening ,the handshake is in the Web in WebSockets GET /Chat HTTP/1.1
+Host: exmaple.com.8000
+Upgrade: websocket
+Connection:Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version:13
+
+2. server handshake Response
+
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection:Upgrade
+Sec-Websocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+
+this sec-websocket-key is converted to sec-websocket-accept header using the complex process
+
+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"+"dGhlIHNhbXBsZSBub25jZQ==" SHA-1 result => "s3pPLMBiTxaQ9kYGzzhZRbK+xOo="
+
+
+First byte:
+Bit 0 FIN: tells whether this is the last message in a series. If it's 0, then the server keeps listening for more parts of the message; otherwise, the server should consider the message delivered. More on this later.
+Bit 1–3 RSV1, RSV2, RSV3: can be ignored, they are for extensions.
+Bits 4-7 OPCODE: defines how to interpret the payload data: 0x0 for continuation, 0x1 for text (which is always encoded in UTF-8), 0x2 for binary, and other so-called "control codes" that will be discussed later. In this version of WebSockets, 0x3 to 0x7 and 0xB to 0xF have no meaning.
+Bit 8 MASK: tells whether the message is encoded. Messages from the client must be masked, so your server must expect this to be 1. (In fact, section 5.1 of the spec says that your server must disconnect from a client if that client sends an unmasked message.) Server-to-client message are not masked and have this bit set to 0. We'll explain masking later, in reading and unmasking the data. Note: You must mask messages even when using a secure socket.
+Bits 9–15: payload length. May also include the following 2 bytes or 8 bytes; see Decoding Payload Length.
+If masking is used (always true for client-to-server messages), the next 4 bytes contain the masking key; see Reading and unmasking the data.
+All subsequent bytes are payload.
+Decoding Payload Length
+To read the payload data, you must know when to stop reading. That's why the payload length is important to know. Unfortunately, this is somewhat complicated. To read it, follow these steps:
+
+Read bits 9-15 (inclusive) and interpret that as an unsigned integer. If it's 125 or less, then that's the length; you're done. If it's 126, go to step 2. If it's 127, go to step 3.
+Read the next 16 bits and interpret those as an unsigned integer. You're done.
+Read the next 64 bits and interpret those as an unsigned integer. (The most significant bit must be 0.) You're done.
 
 
 
