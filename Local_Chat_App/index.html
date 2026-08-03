@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Websocket Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e1dede;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        #status {
+            font-size: 1.2em;
+            color: #f04848;
+        }
+        #messageForm {
+            margin: 20px auto;
+            width: 300px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        #messageInput {
+            width: 90%;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            color: #716d6d;
+        }
+        
+        label {
+            font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #messages {
+            width: 80%;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+        }
+    </style>
+</head>
+
+<body>
+        <h1>Local Websocket Chat</h1>
+        <p id = "status">Connecting...</p>
+
+        <form id="messageForm">
+            <label for="messageInput">Message:</label>
+            <input type="text" id="messageInput" placeholder="Your message here..." />
+            <button type="submit">Send</button>
+        </form>
+
+        <h3>Messages:</h3>
+        <pre id="messages"></pre>
+</body>
+<script>
+    const statusElement = document.getElementById('status');
+    const messagesElement = document.getElementById('messages');
+    const messageInput = document.getElementById('messageInput');
+
+    //websocket client connection
+    const socket = new WebSocket('ws://localhost:8080');
+    
+    const appendMessage = (label,message) => {
+        const messageElement = document.createElement('div');
+        messageElement.innerHTML = `<strong>${label}:</strong> ${message}`;
+        messagesElement.appendChild(messageElement);
+    } 
+
+    socket.addEventListener('open',()=>{
+        statusElement.textContent = 'Connected';
+        statusElement.style.color = 'green';
+        appendMessage('[SYSTEM]','You are connected to the chat server.');
+    })
+
+    socket.addEventListener('close',()=>{
+        statusElement.textContent = 'Disconnected';
+        statusElement.style.color = 'red';
+        appendMessage('[SYSTEM]','You have been disconnected from the chat server.');
+    })
+
+    socket.addEventListener('message',(event)=>{
+        appendMessage('[RECEIVED]',event.data);
+    })
+
+    document.getElementById('messageForm').addEventListener('submit', (event)=>{
+        event.preventDefault();
+        const message = messageInput.value.trim();
+        if(socket.readyState != WebSocket.OPEN || !message) {
+            appendMessage('[SYSTEM]','Cannot send message. Either the connection is closed or the message is empty.');
+            return;
+        }
+
+            socket.send(message);
+            appendMessage('[SENT]',message);
+            messageInput.value = '';
+    })
+</script>
+</html>
