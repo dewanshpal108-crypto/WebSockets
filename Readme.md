@@ -266,7 +266,7 @@ this sec-websocket-key is converted to sec-websocket-accept header using the com
 First byte:
 Bit 0 FIN: tells whether this is the last message in a series. If it's 0, then the server keeps listening for more parts of the message; otherwise, the server should consider the message delivered. More on this later.
 Bit 1–3 RSV1, RSV2, RSV3: can be ignored, they are for extensions.
-Bits 4-7 OPCODE: defines how to interpret the payload data: 0x0 for continuation, 0x1 for text (which is always encoded in UTF-8), 0x2 for binary, and other so-called "control codes" that will be discussed later. In this version of WebSockets, 0x3 to 0x7 and 0xB to 0xF have no meaning.
+Bits 4-7 OPCODE: defines how to interpret the payload data: 0x0 for continuation, 0x1 for text (which is always encoded in UTF-8), 0x2 for binary, and other so-called "control codes"  In this version of WebSockets, 0x3 to 0x7 and 0xB to 0xF have no meaning.
 Bit 8 MASK: tells whether the message is encoded. Messages from the client must be masked, so your server must expect this to be 1. (In fact, section 5.1 of the spec says that your server must disconnect from a client if that client sends an unmasked message.) Server-to-client message are not masked and have this bit set to 0. We'll explain masking later, in reading and unmasking the data. Note: You must mask messages even when using a secure socket.
 Bits 9–15: payload length. May also include the following 2 bytes or 8 bytes; see Decoding Payload Length.
 If masking is used (always true for client-to-server messages), the next 4 bytes contain the masking key; see Reading and unmasking the data.
