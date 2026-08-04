@@ -32,6 +32,7 @@ relaiblity in websockets is confirmed using the ACK received by the client for e
 2. Pub/Sub Pattern:
 we need to use the redis as the shared brain because servers dont share states
 
+```
 [UserA]    [UserB]   [UserC]    [UserD]
    |          |         |          |
    |          |         |          |
@@ -44,4 +45,6 @@ we need to use the redis as the shared brain because servers dont share states
         | |  Message Broker | |
         \-|   Shared Brain  |-/
           |_____ REDIS _____|
+
+```
            
